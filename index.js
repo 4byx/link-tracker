@@ -1,10 +1,14 @@
 import express, { urlencoded } from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 const app = express();
 import routers from './routers/index.js';
 import connectDB from './config/mongo.config.js';
 
 connectDB();
+app.use(cors({
+    origin: '*'
+}));
 app.use(bodyParser.json());
 app.use(urlencoded({extended: true}));
 app.use('/api', routers);
