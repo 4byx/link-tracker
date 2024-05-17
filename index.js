@@ -6,9 +6,7 @@ import routers from './routers/index.js';
 import connectDB from './config/mongo.config.js';
 
 connectDB();
-app.use(cors({
-    origin: '*'
-}));
+app.use(cors());
 app.use(bodyParser.json());
 app.use(urlencoded({extended: true}));
 app.use('/api', routers);

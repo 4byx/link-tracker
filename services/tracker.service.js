@@ -69,6 +69,7 @@ class TrackingService {
         return allLinks.map(link => {
             const linkStats = stats.find(stat => stat._id.equals(link._id));
             return {
+                redirectUrl : link.redirectUrl,
                 originalUrl: link.originalUrl,
                 visits: linkStats ? linkStats.visits : [],
                 hits: link.hits,
