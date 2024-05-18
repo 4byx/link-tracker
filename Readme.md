@@ -27,3 +27,8 @@ Link Tracker Dashboard is a web application that allows you to track and visuali
    ```bash
    git clone https://github.com/4byx/link-tracker.git
    cd link-tracker
+
+2. make a `.env` file
+    ```bash
+    BASE_URL=<base-url-of=app>
+    MONGO_URL=<mongodb-connection-string>
