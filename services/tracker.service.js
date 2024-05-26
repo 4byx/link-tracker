@@ -41,9 +41,55 @@ class TrackingService {
         }
     }
 
+    // async getAllStats() {
+    //     const allLinks = await LinkClick.find({});
+    //     const stats = await UserLinkVisit.aggregate([
+    //         {
+    //             $group: {
+    //                 _id: {
+    //                     linkId: "$linkId",
+    //                     date: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
+    //                 },
+    //                 count: { $sum: 1 },
+    //             },
+    //         },
+    //         {
+    //             $group: {
+    //                 _id: "$_id.linkId",
+    //                 visits: {
+    //                     $push: {
+    //                         date: "$_id.date",
+    //                         hits: "$count",
+    //                     },
+    //                 },
+    //             },
+    //         },
+    //     ]);
+
+    //     return allLinks.map(link => {
+    //         const linkStats = stats.find(stat => stat._id.equals(link._id));
+    //         return {
+    //             redirectUrl : link.redirectUrl,
+    //             originalUrl: link.originalUrl,
+    //             visits: linkStats ? linkStats.visits : [],
+    //             hits: link.hits,
+    //         };
+    //     });
+    // }
+
     async getAllStats() {
         const allLinks = await LinkClick.find({});
+        
+        // Calculate the date for 4 days ago
+        const fourDaysAgo = new Date();
+        fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
+    
         const stats = await UserLinkVisit.aggregate([
+            {
+                $match: {
+                    timestamp: { $gte: fourDaysAgo }
+                }
+            },
             {
                 $group: {
                     _id: {
@@ -64,18 +110,40 @@ class TrackingService {
                     },
                 },
             },
+            {
+                $project: {
+                    visits: { $slice: ["$visits", -4] } // Get only the last 4 visits
+                }
+            },
+            {
+                $unwind: "$visits" // Flatten the visits array to sort them by date
+            },
+            {
+                $sort: {
+                    "visits.date": 1 // Sort visits by date
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    visits: {
+                        $push: "$visits"
+                    }
+                }
+            }
         ]);
-
+    
         return allLinks.map(link => {
             const linkStats = stats.find(stat => stat._id.equals(link._id));
             return {
-                redirectUrl : link.redirectUrl,
+                redirectUrl: link.redirectUrl,
                 originalUrl: link.originalUrl,
                 visits: linkStats ? linkStats.visits : [],
                 hits: link.hits,
             };
         });
     }
+    
 
 }
 
